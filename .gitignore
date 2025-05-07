@@ -3,10 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.DS_Store
+
 # C extensions
 *.so
 
 # Distribution / packaging
+data/
+results/
 .Python
 build/
 develop-eggs/
