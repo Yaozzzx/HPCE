@@ -1,4 +1,4 @@
-# HPCE
+# High‑Performance Computing and Energy
 
 ## Motivation
 
