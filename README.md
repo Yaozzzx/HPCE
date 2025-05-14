@@ -17,16 +17,15 @@ A suggested layout for this project is:
 
 .
 ├── data/
-│ └── MAR2_hpl/
-│ ├── 65k_64_56/
-│ │ └── round0/preprocessing/round0.pkl
-│ ├── 65k_64_112/
-│ │ └── …
-│ └── …
+│   └── MAR2_hpl/
+│       ├── 65k_64_56/
+│       │   └── round0/preprocessing/round0.pkl
+│       ├── 65k_64_112/
+│       └── …/
 ├── notebooks/
-│ └── exploratory_analysis.ipynb
+│   └── exploratory_analysis.ipynb
 ├── results/
-│ └── <input_data><clusters><n_jobs>_<t_max>.csv
+│   └── <input_data>_<clusters>_<n_jobs>_<t_max>.csv
 ├── hpc_energy_scheduler.py
 └── README.md
 
@@ -54,7 +53,7 @@ This script implements a complete pipeline for thermal-aware job scheduling on m
    - $f_{ij}$: average frequency of core i in cluster j  
    - $P_{ij}$: average power of core i in cluster j  
 
-5. **Estimates ambient/idle power** $\bar P$ from low-utilization samples and builds the static linear surrogate matrix $\mathbf{GS}$ by fitting a single-hidden-layer MLP to predict each core’s temperature rise from all cores’ power budgets. The matrix is rectified, capped at its 99th percentile, and symmetrized for physical plausibility.
+5. **Estimates ambient/idle power** $\bar P$ from low-utilization samples and builds the static linear surrogate matrix GS by fitting a single-hidden-layer MLP to predict each core’s temperature rise from all cores’ power budgets. The matrix is rectified, capped at its 99th percentile, and symmetrized for physical plausibility.
 
 6. **Solves two ILP scheduling problems** with Gurobi:  
    - **NN-static** uses the precomputed \(\mathbf{GS}\) matrix in the thermal constraint  
