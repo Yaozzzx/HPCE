@@ -15,19 +15,19 @@ By operating accelerators right up to their safe thermal envelope, we cut rack�
 
 A suggested layout for this project is:
 
-.
-├── data/
-│   └── MAR2_hpl/
-│       ├── 65k_64_56/
-│       │   └── round0/preprocessing/round0.pkl
-│       ├── 65k_64_112/
-│       └── …/
-├── notebooks/
-│   └── exploratory_analysis.ipynb
-├── results/
-│   └── <input_data>_<clusters>_<n_jobs>_<t_max>.csv
-├── hpc_energy_scheduler.py
-└── README.md
+- **`data/`**
+  - `MAR2_hpl/`
+    - `65k_64_56/`
+      - `round0/preprocessing/round0.pkl`
+    - `65k_64_112/`
+    - …
+- **`notebooks/`**
+  - `exploratory_analysis.ipynb`
+- **`results/`**
+  - `<input_data>_<clusters>_<n_jobs>_<t_max>.csv`
+- **`hpc_energy_scheduler.py`**
+- **`README.md`**
+
 
 - **`data/`**: raw MAR2_hpl pickles organized by configuration  
 - **`notebooks/`**: Jupyter notebooks for analysis and visualization  
