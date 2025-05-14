@@ -1,1 +1,49 @@
 # HPCE
+
+## Motivation
+
+Training large language models (LLMs) and other data‐intensive workloads on modern GPUs demands both high throughput and strict thermal safety.  Overly aggressive scheduling can push cores past safe temperatures, leading to throttling, hardware wear, and inflated cooling costs.  This project—described in [our paper](#)—introduces a mixed‐integer scheduling framework that:
+
+- Learns a fast linear thermal‐coupling surrogate from benchmark traces  
+- Embeds a ReLU‐based neural network directly in the ILP for higher fidelity  
+- Balances compute throughput against core‐level temperature constraints  
+
+By operating accelerators right up to their safe thermal envelope, we cut rack‐hours and energy bills, avoid unplanned downtime, and accelerate time‐to‐results for revenue‐critical training runs.
+
+---
+
+## What `hpc_energy_scheduler.py` Does
+
+This script implements a complete pipeline for thermal-aware job scheduling on multi-core HPC accelerators, using both a linear surrogate and an embedded neural network surrogate. Specifically, it:
+
+1. **Parses command-line arguments**  
+   - `--input_data`: the MAR2_hpl subfolder (e.g. `65k_64_56`)  
+   - `--clusters`: number of frequency clusters (default 5)  
+   - `--n_jobs`: number of jobs to schedule (default 10)  
+   - `--t_max`: maximum allowable core temperature (default 100 °C)  
+
+2. **Loads the MAR2_hpl time-series data** from the specified subfolder’s `round0.pkl`, extracting per-core frequency, temperature, performance counters (APERF/MPERF), and package-level power.
+
+3. **Expands package-level power to per-core power**, using the APERF/MPERF ratio to allocate package energy among cores.
+
+4. **Clusters normalized TSC-frequency values** via K-means to identify discrete DVFS states, then computes  
+   - \(f_{ij}\): average frequency of core \(i\) in cluster \(j\)  
+   - \(P_{ij}\): average power of core \(i\) in cluster \(j\)  
+
+5. **Estimates ambient/idle power** \(\bar P\) from low-utilization samples and builds the static linear surrogate matrix \(\mathbf{GS}\) by fitting a single-hidden-layer MLP to predict each core’s temperature rise from all cores’ power budgets. The matrix is rectified, capped at its 99th percentile, and symmetrized for physical plausibility.
+
+6. **Solves two ILP scheduling problems** with Gurobi:  
+   - **NN-static** uses the precomputed \(\mathbf{GS}\) matrix in the thermal constraint  
+   - **NN-embedded** embeds the ReLU network exactly via big-\(M\) constraints, replacing the linear surrogate  
+
+   Both models maximize total throughput \(\sum f_{ij} x_{ij}\) subject to job‐count, assignment, and per-core temperature limits.
+
+7. **Extracts and combines results**  
+   - Core assignments, predicted temperatures, objective values, and peak temperatures from each model  
+   - Joins them into a single DataFrame and writes `./results/<input_data>_<clusters>_<n_jobs>_<t_max>.csv`
+
+In short, running:
+
+```bash
+python hpc_energy_scheduler.py --input_data 65k_64_56 --clusters 5 --n_jobs 110 --t_max 85
+```
